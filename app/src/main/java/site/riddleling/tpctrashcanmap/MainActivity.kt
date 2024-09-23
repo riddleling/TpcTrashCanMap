@@ -177,20 +177,9 @@ fun MainActivityContent(modifier: Modifier = Modifier) {
         }
 
         if (isLoading) {
-            Column (
-                modifier = Modifier
-                    .size(width = 200.dp, height = 100.dp)
-                    .align(Alignment.Center)
-                    .background(
-                        Color.LightGray.copy(alpha = 0.8f),
-                        shape = RoundedCornerShape(10.dp)
-                    ),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                CircularProgressIndicator()
-                Text(text = "下載資料中...")
-            }
+            DownloadProgressIndicator(
+                Modifier.align(Alignment.Center)
+            )
         }
 
         if (openSheet) {
@@ -249,8 +238,26 @@ fun MainActivityContent(modifier: Modifier = Modifier) {
             }
         }
     }
-
 }
+
+@Composable
+fun DownloadProgressIndicator(modifier: Modifier = Modifier) {
+    Column (
+        modifier = modifier
+            .size(width = 200.dp, height = 100.dp)
+            .background(
+                Color.LightGray.copy(alpha = 0.8f),
+                shape = RoundedCornerShape(10.dp)
+            ),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        CircularProgressIndicator()
+        Text(text = "下載資料中...")
+    }
+}
+
+
 
 fun navigateToLocation(activity: Activity, latitude: Double, longitude: Double) {
     val gmmIntentUri = Uri.parse("google.navigation:q=$latitude,$longitude&mode=w")
