@@ -46,8 +46,10 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -145,7 +147,7 @@ fun MainActivityContent(modifier: Modifier = Modifier) {
     val isLoading by mainViewModel.isLoading.collectAsStateWithLifecycle()
 
     val sheetState = rememberModalBottomSheetState()
-    var openSheet by remember { mutableStateOf(false) }
+    var openSheet = remember { mutableStateOf(false) }
     var selectedTrashCan by remember { mutableStateOf<TrashCanData?>(null) }
 
     Box(
@@ -169,7 +171,7 @@ fun MainActivityContent(modifier: Modifier = Modifier) {
                     draggable = false,
                     onClick = {
                         selectedTrashCan = trashCan
-                        openSheet = true
+                        openSheet.value = true
                         false
                     }
                 )
@@ -182,60 +184,8 @@ fun MainActivityContent(modifier: Modifier = Modifier) {
             )
         }
 
-        if (openSheet) {
-            ModalBottomSheet(
-                sheetState = sheetState,
-                onDismissRequest = { openSheet = false }
-            ) {
-                Column (
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 20.dp, end = 20.dp, bottom = 20.dp)
-                ) {
-                    IconButton(
-                        onClick = { openSheet = false },
-                        modifier = Modifier
-                            .align(Alignment.End)
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.close_24dp),
-                            contentDescription = "close",
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = selectedTrashCan?.address ?: "",
-                            Modifier.fillMaxWidth(0.7f)
-                        )
-                        Spacer(modifier = Modifier.weight(1f))
-                        Button(
-                            onClick = {
-                                val activity = context as? Activity
-                                navigateToLocation(activity!!,
-                                    selectedTrashCan?.latitude!!,
-                                    selectedTrashCan?.longitude!!)
-                            },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF019858))
-                        ) {
-                            Image(
-                                painter = painterResource(id = R.drawable.navigation_24dp),
-                                contentDescription = "Icon",
-                                modifier = Modifier.size(16.dp),
-                                colorFilter = ColorFilter.tint(Color.White)
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(text = "導航", fontSize = 12.sp, color = Color.White)
-                        }
-                    }
-                }
-            }
+        if (openSheet.value) {
+            MainModalBottomSheet(selectedTrashCan, sheetState, openSheet)
         }
     }
 }
@@ -257,7 +207,64 @@ fun DownloadProgressIndicator(modifier: Modifier = Modifier) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MainModalBottomSheet(selectedTrashCan: TrashCanData?, sheetState: SheetState, openSheet: MutableState<Boolean>) {
+    val context = LocalContext.current
 
+    ModalBottomSheet(
+        sheetState = sheetState,
+        onDismissRequest = { openSheet.value = false }
+    ) {
+        Column (
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 20.dp, end = 20.dp, bottom = 20.dp)
+        ) {
+            IconButton(
+                onClick = { openSheet.value = false },
+                modifier = Modifier.align(Alignment.End)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.close_24dp),
+                    contentDescription = "close",
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = selectedTrashCan?.address ?: "",
+                    Modifier.fillMaxWidth(0.7f)
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                Button(
+                    onClick = {
+                        val activity = context as? Activity
+                        navigateToLocation(activity!!,
+                            selectedTrashCan?.latitude!!,
+                            selectedTrashCan?.longitude!!)
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF019858))
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.navigation_24dp),
+                        contentDescription = "Icon",
+                        modifier = Modifier.size(16.dp),
+                        colorFilter = ColorFilter.tint(Color.White)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(text = "導航", fontSize = 12.sp, color = Color.White)
+                }
+            }
+        }
+    }
+}
 
 fun navigateToLocation(activity: Activity, latitude: Double, longitude: Double) {
     val gmmIntentUri = Uri.parse("google.navigation:q=$latitude,$longitude&mode=w")
