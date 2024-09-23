@@ -146,7 +146,7 @@ fun MainActivityContent(modifier: Modifier = Modifier) {
     val trashCanData by mainViewModel.trashCanData.collectAsStateWithLifecycle()
     val isLoading by mainViewModel.isLoading.collectAsStateWithLifecycle()
 
-    val sheetState = rememberModalBottomSheetState()
+
     var openSheet = remember { mutableStateOf(false) }
     var selectedTrashCan by remember { mutableStateOf<TrashCanData?>(null) }
 
@@ -185,7 +185,7 @@ fun MainActivityContent(modifier: Modifier = Modifier) {
         }
 
         if (openSheet.value) {
-            MainModalBottomSheet(selectedTrashCan, sheetState, openSheet)
+            MainModalBottomSheet(selectedTrashCan, openSheet)
         }
     }
 }
@@ -209,7 +209,8 @@ fun DownloadProgressIndicator(modifier: Modifier = Modifier) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainModalBottomSheet(selectedTrashCan: TrashCanData?, sheetState: SheetState, openSheet: MutableState<Boolean>) {
+fun MainModalBottomSheet(selectedTrashCan: TrashCanData?, openSheet: MutableState<Boolean>) {
+    val sheetState = rememberModalBottomSheetState()
     val context = LocalContext.current
 
     ModalBottomSheet(
