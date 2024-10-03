@@ -46,7 +46,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.SheetState
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -57,25 +57,28 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
+import org.koin.androidx.compose.koinViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+
             TpcTrashCanMapTheme {
                 Scaffold(
+                    topBar = { MainTopBar() },
                     modifier = Modifier.fillMaxSize()
                 ) {
                     MainActivityContent(Modifier.padding(it))
@@ -87,10 +90,41 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+fun MainTopBar() {
+    val mainViewModel: MainViewModel = koinViewModel()
+    TopAppBar(
+        title = {
+            Text(text = stringResource(id = R.string.app_name))
+        },
+        actions = {
+            IconButton(
+                onClick = {
+                    mainViewModel.fetchData()
+                },
+                content = {
+                    Image(
+                        painter = painterResource(id = R.drawable.refresh_24dp),
+                        contentDescription = "refresh",
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            )
+        }
+    )
+}
+
+@Composable
 fun MainActivityContent(modifier: Modifier = Modifier) {
     var hasLocationPermission by remember { mutableStateOf(false) }
     var currentLocation by remember { mutableStateOf<android.location.Location?>(null) }
     val context = LocalContext.current
+
+    val mainViewModel: MainViewModel = koinViewModel()
+    val trashCanData by mainViewModel.trashCanData.collectAsStateWithLifecycle()
+    val isLoading by mainViewModel.isLoading.collectAsStateWithLifecycle()
+
+    var openSheet = remember { mutableStateOf(false) }
+    var selectedTrashCan by remember { mutableStateOf<TrashCanData?>(null) }
 
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -141,14 +175,6 @@ fun MainActivityContent(modifier: Modifier = Modifier) {
             )
         }
     }
-
-    val mainViewModel: MainViewModel = viewModel()
-    val trashCanData by mainViewModel.trashCanData.collectAsStateWithLifecycle()
-    val isLoading by mainViewModel.isLoading.collectAsStateWithLifecycle()
-
-
-    var openSheet = remember { mutableStateOf(false) }
-    var selectedTrashCan by remember { mutableStateOf<TrashCanData?>(null) }
 
     Box(
         modifier = modifier.fillMaxSize()

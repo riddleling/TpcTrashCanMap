@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -30,21 +31,20 @@ class MainViewModel : ViewModel() {
         fetchData()
     }
 
-    private fun fetchData() {
+    fun fetchData() {
+        _trashCanData.value = mutableListOf<TrashCanData>()
         _isLoading.value = true
         val client = OkHttpClient.Builder().build()
         val request = Request.Builder().url(infoUrl).build()
 
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                var response = client.newCall(request).execute()
-                response.body?.run {
-                    val json = JSONObject(string())
-                    dataUrl = json.getString("url")
-                    dataList.clear()
-                    fetchOffset = 0
-                    downloadTrashCanData()
-                }
+        CoroutineScope(Dispatchers.IO).launch {
+            var response = client.newCall(request).execute()
+            response.body?.run {
+                val json = JSONObject(string())
+                dataUrl = json.getString("url")
+                dataList.clear()
+                fetchOffset = 0
+                downloadTrashCanData()
             }
         }
     }
@@ -76,8 +76,10 @@ class MainViewModel : ViewModel() {
                 downloadTrashCanData()
             } else {
                 println("dataList: ${dataList.size}")
-                _isLoading.value = false
-                _trashCanData.value = dataList
+                withContext(Dispatchers.Main) {
+                    _isLoading.value = false
+                    _trashCanData.value = dataList
+                }
             }
         }
     }
