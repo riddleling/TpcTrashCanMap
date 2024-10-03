@@ -76,10 +76,8 @@ class MainViewModel : ViewModel() {
                 downloadTrashCanData()
             } else {
                 println("dataList: ${dataList.size}")
-                withContext(Dispatchers.Main) {
-                    _isLoading.value = false
-                    _trashCanData.value = dataList
-                }
+                _isLoading.value = false
+                _trashCanData.value = dataList
             }
         }
     }
