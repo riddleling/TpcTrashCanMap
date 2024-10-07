@@ -1,14 +1,11 @@
 package site.riddleling.tpctrashcanmap
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
@@ -26,9 +23,16 @@ class MainViewModel : ViewModel() {
     private val _isLoading : MutableStateFlow<Boolean> = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
+    private val _placeData : MutableStateFlow<PlaceData?> = MutableStateFlow(null)
+    val placeData: StateFlow<PlaceData?> = _placeData
+
 
     init {
         fetchData()
+    }
+
+    fun setPlaceData(placeData: PlaceData?) {
+        _placeData.value = placeData
     }
 
     fun fetchData() {
