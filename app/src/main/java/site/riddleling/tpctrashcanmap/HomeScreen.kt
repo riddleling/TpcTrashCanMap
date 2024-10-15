@@ -44,6 +44,7 @@ fun HomeScreenContent(modifier: Modifier = Modifier) {
     val trashCanData by mainViewModel.trashCanData.collectAsStateWithLifecycle()
     val isLoading by mainViewModel.isLoading.collectAsStateWithLifecycle()
     val placeData by mainViewModel.placeData.collectAsStateWithLifecycle()
+    val isMoveToPlace by mainViewModel.isMoveToPlace.collectAsStateWithLifecycle()
 
     var openSheet = remember { mutableStateOf(false) }
     var selectedTrashCan by remember { mutableStateOf<TrashCanData?>(null) }
@@ -100,13 +101,16 @@ fun HomeScreenContent(modifier: Modifier = Modifier) {
 
     // 獲取到地點資料後，更新地圖位置
     placeData?.let { place ->
-        LaunchedEffect(placeData) {
-            cameraPositionState.animate(
-                update = CameraUpdateFactory.newLatLngZoom(
-                    LatLng(place.latitude, place.longitude),
-                    17f
+        LaunchedEffect(isMoveToPlace) {
+            if (isMoveToPlace) {
+                cameraPositionState.animate(
+                    update = CameraUpdateFactory.newLatLngZoom(
+                        LatLng(place.latitude, place.longitude),
+                        17f
+                    )
                 )
-            )
+            }
+            mainViewModel.setIsMoveToPlace(false)
         }
     }
 

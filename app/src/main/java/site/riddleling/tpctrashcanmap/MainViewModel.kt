@@ -27,12 +27,19 @@ class MainViewModel : ViewModel() {
     val placeData: StateFlow<PlaceData?> = _placeData
 
 
+    private val _isMoveToPlace : MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val isMoveToPlace: StateFlow<Boolean> = _isMoveToPlace
+
     init {
         fetchData()
     }
 
     fun setPlaceData(placeData: PlaceData?) {
         _placeData.value = placeData
+    }
+
+    fun setIsMoveToPlace(isMove: Boolean) {
+        _isMoveToPlace.value = isMove
     }
 
     fun fetchData() {

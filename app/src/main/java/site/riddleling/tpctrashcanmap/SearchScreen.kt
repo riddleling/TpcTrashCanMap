@@ -103,10 +103,8 @@ fun SearchScreenContent(modifier: Modifier = Modifier) {
                                     prediction.getPrimaryText(null).toString(),
                                     prediction.getSecondaryText(null).toString())
                                 mainViewModel.setPlaceData(placeData)
+                                mainViewModel.setIsMoveToPlace(true)
                                 activity?.finish()
-//                                Toast.makeText(context,
-//                                    "Selected: ${location.latitude}, ${location.longitude}",
-//                                    Toast.LENGTH_SHORT).show()
                             }
                         }.addOnFailureListener { exception ->
                             println("Place not found: ${exception.message}")
